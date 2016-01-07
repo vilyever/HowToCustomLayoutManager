@@ -41,6 +41,8 @@ public class DataAdapter extends RecyclerView.Adapter<DemoViewHolder> implements
     /** @see RecyclerView.Adapter#onBindViewHolder(RecyclerView.ViewHolder, int)  **/
     @Override
     public void onBindViewHolder(DemoViewHolder holder, int position) {
+        holder.itemView.getLayoutParams().width = (self.demoModels.get(position).getPreferWidth());
+        holder.itemView.getLayoutParams().height = (self.demoModels.get(position).getPreferHeight());
         holder.reload(self);
     }
 
