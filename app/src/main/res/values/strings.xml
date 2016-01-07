@@ -1,4 +1,22 @@
 <resources>
     <string name="app_name">HowToCustomLayoutManager</string>
     <string name="action_settings">Settings</string>
+
+    <string name="action_add">Add</string>
+    <string name="action_remove">Remove</string>
+    <string name="action_empty">Empty</string>
+    <string name="action_small">Small Data</string>
+    <string name="action_medium">Medium Data</string>
+    <string name="action_large">Large Data</string>
+    <string name="action_scroll_vertical_zero">Scroll Vertical Zero</string>
+    <string name="action_scroll_horizontal_zero">Scroll Horizontal Zero</string>
+    <string name="action_scroll_vertical_end">Scroll Vertical End</string>
+    <string name="action_scroll_horizontal_end">Scroll Horizontal End</string>
+    <string name="action_smooth_vertical_zero">Smooth Scroll Vertical Zero</string>
+    <string name="action_smooth_vertical_end">Smooth Scroll Vertical End</string>
+    <string name="action_smooth_horizontal_zero">Smooth Scroll Horizontal Zero</string>
+    <string name="action_smooth_horizontal_end">Smooth Scroll Horizontal End</string>
+    <string name="action_scroll_position">Scroll To Position</string>
+    <string name="action_smooth_position">Smooth Scroll To Position</string>
+    <string name="title_activity_main2">Main2Activity</string>
 </resources>

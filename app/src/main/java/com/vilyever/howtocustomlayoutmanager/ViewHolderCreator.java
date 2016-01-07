@@ -8,17 +8,17 @@ import android.view.ViewGroup;
 import java.lang.reflect.Constructor;
 
 /**
- * ViewHolderCreater
+ * ViewHolderCreator
  * HowToCustomLayoutManager <com.vilyever.howtocustomlayoutmanager>
  * Created by vilyever on 2016/1/7.
  * Feature:
  * 提供ViewHolder的便捷构造
  */
-public class ViewHolderCreater {
+public class ViewHolderCreator {
     /**
      * this的便捷访问
      */
-    final ViewHolderCreater self = this;
+    final ViewHolderCreator self = this;
 
     /**
      * ViewHolder便捷构造

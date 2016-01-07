@@ -19,6 +19,30 @@ public class DemoModel {
      */
     final DemoModel self = this;
 
+    public static DemoModel generateDemoModel() {
+        DemoModel demoModel = new DemoModel();
+        Random random = new Random();
+        int color = Color.rgb(Math.abs(random.nextInt()) % 256, Math.abs(random.nextInt()) % 256, Math.abs(random.nextInt()) % 256);
+        int width = (Math.abs(random.nextInt()) % 4) * 80 + 100;
+        int height = (Math.abs(random.nextInt()) % 4) * 80 + 100;
+        demoModel.setTitle(width + "x" + height).setColor(color).setPreferWidth(width).setPreferHeight(height);
+        return demoModel;
+    }
+
+    /**
+     * 生成50个model列表
+     * @return 50个model列表
+     */
+    public static ArrayList<DemoModel> generateDemoList() {
+        ArrayList<DemoModel> models = new ArrayList<>();
+
+        for (int i = 0; i < 50; i++) {
+            models.add(DemoModel.generateDemoModel());
+        }
+
+        return models;
+    }
+
     private String title;
     public DemoModel setTitle(String title) {
         this.title = title;
@@ -55,21 +79,4 @@ public class DemoModel {
         return preferHeight;
     }
 
-    /**
-     * 生成50个model列表
-     * @return 50个model列表
-     */
-    public static ArrayList<DemoModel> generateDemoList() {
-        ArrayList<DemoModel> models = new ArrayList<>();
-
-        Random random = new Random();
-        for (int i = 0; i < 50; i++) {
-            int color = Color.rgb(Math.abs(random.nextInt()) % 256, Math.abs(random.nextInt()) % 256, Math.abs(random.nextInt()) % 256);
-            int width = (Math.abs(random.nextInt()) % 4) * 80 + 100;
-            int height = (Math.abs(random.nextInt()) % 4) * 80 + 100;
-            models.add(new DemoModel().setTitle("" + i).setColor(color).setPreferWidth(width).setPreferHeight(height));
-        }
-
-        return models;
-    }
 }

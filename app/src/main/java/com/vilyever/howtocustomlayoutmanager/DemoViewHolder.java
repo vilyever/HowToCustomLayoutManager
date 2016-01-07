@@ -19,27 +19,46 @@ public class DemoViewHolder extends RecyclerView.ViewHolder {
      */
     final DemoViewHolder self = this;
 
+    public DemoViewHolder(View itemView) {
+        super(itemView);
+
+        itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                self.getDelegate().onClick(self);
+            }
+        });
+    }
+
+    /**
+     * itemView点击事件回调接口
+     */
+    private Delegate delegate;
+    public DemoViewHolder setDelegate(Delegate delegate) {
+        this.delegate = delegate;
+        return this;
+    }
+    public Delegate getDelegate() {
+        if (delegate == null) {
+            return NullDelegate;
+        }
+        return delegate;
+    }
+    public interface Delegate {
+        void onClick(DemoViewHolder viewHolder);
+    }
+    private static final Delegate NullDelegate = new Delegate() {
+        @Override
+        public void onClick(DemoViewHolder viewHolder) {
+        }
+    };
+
     /**
      * 文字标签，用于展示文字和背景色
      * 可以通过getter{@link #getTitleLabel()}直接在adapter中获取
      */
     private TextView titleLabel;
     public TextView getTitleLabel() { if (titleLabel == null) { titleLabel = (TextView) self.itemView.findViewById(R.id.titleLabel); } return titleLabel; }
-
-    /* #Constructors */
-    public DemoViewHolder(View itemView) {
-        super(itemView);
-    }
-    
-    /* #Overrides */    
-    
-    /* #Accessors */     
-     
-    /* #Delegates */     
-     
-    /* #Private Methods */    
-    
-    /* #Public Methods */
 
     /**
      * 刷新此ViewHolder
@@ -59,12 +78,8 @@ public class DemoViewHolder extends RecyclerView.ViewHolder {
      */
     public static DemoViewHolder newInstance(ViewGroup parent) {
         Class currentClass = new Object() { }.getClass().getEnclosingClass(); // 获取当前class，免除每次攥写ViewHolder都要改名获取当前ViewHolder类型的麻烦
-        return ViewHolderCreater.CreateInstance(currentClass, parent, R.layout.demo_view_holder);
+        return ViewHolderCreator.CreateInstance(currentClass, parent, R.layout.demo_view_holder);
     }
-
-    /* #Classes */
-
-    /* #Interfaces */
 
     /**
      * 数据接口，更新此ViewHolder只需要提供以下数据
@@ -73,8 +88,4 @@ public class DemoViewHolder extends RecyclerView.ViewHolder {
         String gainTitle(DemoViewHolder viewHolder);
         int gainBackgroundColor(DemoViewHolder viewHolder);
     }
-     
-    /* #Annotations @interface */    
-    
-    /* #Enums */
 }

@@ -1,6 +1,7 @@
 package com.vilyever.howtocustomlayoutmanager;
 
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -39,6 +40,23 @@ public class MainActivity extends AppCompatActivity {
     public DataAdapter getDataAdapter() {
         if (dataAdapter == null) {
             dataAdapter = new DataAdapter();
+            dataAdapter.setDelegate(new DataAdapter.Delegate() {
+                @Override
+                public void onItemClick(DataAdapter adapter, int position) {
+                    Snackbar.make(self.getRecyclerView(),
+                            "Item " + position + " clicked. " + self.getDataAdapter().getDemoModels().get(position).getPreferWidth() + "x" + self.getDataAdapter().getDemoModels().get(position).getPreferHeight(),
+                            Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+
+                    System.out.println("computeHorizontalScrollOffset " + self.getRecyclerView().computeHorizontalScrollOffset());
+                    System.out.println("computeHorizontalScrollExtent " + self.getRecyclerView().computeHorizontalScrollExtent());
+                    System.out.println("computeHorizontalScrollRange " + self.getRecyclerView().computeHorizontalScrollRange());
+                    System.out.println("computeVerticalScrollOffset " + self.getRecyclerView().computeVerticalScrollOffset());
+                    System.out.println("computeVerticalScrollExtent " + self.getRecyclerView().computeVerticalScrollExtent());
+                    System.out.println("computeVerticalScrollRange " + self.getRecyclerView().computeVerticalScrollRange());
+                    System.out.println("rh " + self.getRecyclerView().getHeight());
+                }
+            });
         }
         return dataAdapter;
     }
@@ -54,6 +72,10 @@ public class MainActivity extends AppCompatActivity {
         self.getRecyclerView().setLayoutManager(self.getLayoutManager());
         self.getRecyclerView().setAdapter(self.getDataAdapter());
         self.getDataAdapter().setDemoModels(self.getDemoModels());
+        self.getRecyclerView().getItemAnimator().setAddDuration(1000);
+        self.getRecyclerView().getItemAnimator().setChangeDuration(1000);
+        self.getRecyclerView().getItemAnimator().setMoveDuration(1000);
+        self.getRecyclerView().getItemAnimator().setRemoveDuration(1000);
     }
 
     @Override
@@ -70,11 +92,88 @@ public class MainActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
+        /**
+         * copy the NumberPickerDialog from https://github.com/devunwired/recyclerview-playground/blob/master/app/src/main/java/com/example/android/recyclerplayground/NumberPickerDialog.java
+         */
+        NumberPickerDialog dialog;
+        switch (item.getItemId()) {
+            case R.id.action_add:
+                dialog = new NumberPickerDialog(self);
+                dialog.setTitle("Position to Add");
+                dialog.setPickerRange(0, self.getDataAdapter().getItemCount());
+                dialog.setOnNumberSelectedListener(new NumberPickerDialog.OnNumberSelectedListener() {
+                    @Override
+                    public void onNumberSelected(int value) {
+                        self.getDataAdapter().addModel(DemoModel.generateDemoModel(), value);
+                    }
+                });
+                dialog.show();
 
-        return super.onOptionsItemSelected(item);
+                return true;
+            case R.id.action_remove:
+                dialog = new NumberPickerDialog(self);
+                dialog.setTitle("Position to Remove");
+                dialog.setPickerRange(0, self.getDataAdapter().getItemCount() - 1);
+                dialog.setOnNumberSelectedListener(new NumberPickerDialog.OnNumberSelectedListener() {
+                    @Override
+                    public void onNumberSelected(int value) {
+                        self.getDataAdapter().removeModel(value);
+                    }
+                });
+                dialog.show();
+
+                return true;
+            case R.id.action_empty:
+                self.getDataAdapter().clear();
+                return true;
+            case R.id.action_small:
+                self.getDemoModels().clear();
+                for (int i = 0; i < 5; i++) {
+                    self.getDemoModels().add(DemoModel.generateDemoModel());
+                }
+                self.getDataAdapter().setDemoModels(self.getDemoModels());
+                return true;
+            case R.id.action_medium:
+                self.getDemoModels().clear();
+                for (int i = 0; i < 50; i++) {
+                    self.getDemoModels().add(DemoModel.generateDemoModel());
+                }
+                self.getDataAdapter().setDemoModels(self.getDemoModels());
+                return true;
+            case R.id.action_large:
+                self.getDemoModels().clear();
+                for (int i = 0; i < 100; i++) {
+                    self.getDemoModels().add(DemoModel.generateDemoModel());
+                }
+                self.getDataAdapter().setDemoModels(self.getDemoModels());
+                return true;
+            case R.id.action_scroll_to_position:
+                dialog = new NumberPickerDialog(self);
+                dialog.setTitle("Position to Scroll");
+                dialog.setPickerRange(0, self.getDataAdapter().getItemCount() - 1);
+                dialog.setOnNumberSelectedListener(new NumberPickerDialog.OnNumberSelectedListener() {
+                    @Override
+                    public void onNumberSelected(int value) {
+                        self.getRecyclerView().scrollToPosition(value);
+                    }
+                });
+                dialog.show();
+
+                return true;
+            case R.id.action_smooth_to_position:
+                dialog = new NumberPickerDialog(self);
+                dialog.setTitle("Position to Smooth Scroll");
+                dialog.setPickerRange(0, self.getDataAdapter().getItemCount() - 1);
+                dialog.setOnNumberSelectedListener(new NumberPickerDialog.OnNumberSelectedListener() {
+                    @Override
+                    public void onNumberSelected(int value) {
+                        self.getRecyclerView().smoothScrollToPosition(value);
+                    }
+                });
+                dialog.show();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }
