@@ -15,9 +15,7 @@ import java.lang.reflect.Constructor;
  * 提供ViewHolder的便捷构造
  */
 public class ViewHolderCreator {
-    /**
-     * this的便捷访问
-     */
+    /** Convenience Var to call this */
     final ViewHolderCreator self = this;
 
     /**

@@ -12,9 +12,7 @@ import android.view.MenuItem;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
-    /**
-     * this的便捷访问
-     */
+    /** Convenience Var to call this */
     final MainActivity self = this;
 
     private RecyclerView recyclerView;
@@ -47,14 +45,6 @@ public class MainActivity extends AppCompatActivity {
                             "Item " + position + " clicked. " + self.getDataAdapter().getDemoModels().get(position).getPreferWidth() + "x" + self.getDataAdapter().getDemoModels().get(position).getPreferHeight(),
                             Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
-
-                    System.out.println("computeHorizontalScrollOffset " + self.getRecyclerView().computeHorizontalScrollOffset());
-                    System.out.println("computeHorizontalScrollExtent " + self.getRecyclerView().computeHorizontalScrollExtent());
-                    System.out.println("computeHorizontalScrollRange " + self.getRecyclerView().computeHorizontalScrollRange());
-                    System.out.println("computeVerticalScrollOffset " + self.getRecyclerView().computeVerticalScrollOffset());
-                    System.out.println("computeVerticalScrollExtent " + self.getRecyclerView().computeVerticalScrollExtent());
-                    System.out.println("computeVerticalScrollRange " + self.getRecyclerView().computeVerticalScrollRange());
-                    System.out.println("rh " + self.getRecyclerView().getHeight());
                 }
             });
         }

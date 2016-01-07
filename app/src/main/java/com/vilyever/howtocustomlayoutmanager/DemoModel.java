@@ -14,9 +14,7 @@ import java.util.Random;
  * 仅提供示例所需数据，实际应用中可能存在更多冗余数据（针对RecyclerView所需）
  */
 public class DemoModel {
-    /**
-     * this的便捷访问
-     */
+    /** Convenience Var to call this */
     final DemoModel self = this;
 
     public static DemoModel generateDemoModel() {

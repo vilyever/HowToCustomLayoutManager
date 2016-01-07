@@ -14,9 +14,7 @@ import android.widget.TextView;
  * 示例ViewHolder，简单展示一个TextView显示不同文字和背景色
  */
 public class DemoViewHolder extends RecyclerView.ViewHolder {
-    /**
-     * this的便捷访问
-     */
+    /** Convenience Var to call this */
     final DemoViewHolder self = this;
 
     public DemoViewHolder(View itemView) {

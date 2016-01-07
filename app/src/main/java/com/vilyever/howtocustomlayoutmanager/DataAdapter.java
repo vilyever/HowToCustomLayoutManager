@@ -15,9 +15,7 @@ import java.util.List;
  * 通过绑定数据列表向绑定的ViewHolder提供内容
  */
 public class DataAdapter extends RecyclerView.Adapter<DemoViewHolder> implements DemoViewHolder.Datasource, DemoViewHolder.Delegate {
-    /**
-     * this的便捷访问
-     */
+    /** Convenience Var to call this */
     final DataAdapter self = this;
 
     /** @see RecyclerView.Adapter#onCreateViewHolder(ViewGroup, int) **/
