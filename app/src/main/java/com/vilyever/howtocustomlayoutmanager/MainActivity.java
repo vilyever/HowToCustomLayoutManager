@@ -3,7 +3,6 @@ package com.vilyever.howtocustomlayoutmanager;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -18,10 +17,10 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     public RecyclerView getRecyclerView() { if (recyclerView == null) { recyclerView = (RecyclerView) self.findViewById(R.id.recyclerView); } return recyclerView; }
 
-    private LinearLayoutManager layoutManager;
-    public LinearLayoutManager getLayoutManager() {
+    private CustomLayoutManager layoutManager;
+    public CustomLayoutManager getLayoutManager() {
         if (layoutManager == null) {
-            layoutManager = new LinearLayoutManager(self);
+            layoutManager = new CustomLayoutManager();
         }
         return layoutManager;
     }

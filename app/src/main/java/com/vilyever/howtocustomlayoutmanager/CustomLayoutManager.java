@@ -16,15 +16,17 @@ public class CustomLayoutManager extends RecyclerView.LayoutManager {
 
     @Override
     public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
-        detachAndScrapAttachedViews(recycler);
+        detachAndScrapAttachedViews(recycler); // 分离所有的itemView
 
         int offsetX = 0;
         int offsetY = 0;
 
         for (int i = 0; i < getItemCount(); i++) {
-            View scrap = recycler.getViewForPosition(i);
+            View scrap = recycler.getViewForPosition(i); // 根据position获取一个碎片view，可以从回收的view中获取，也可能新构造一个
+
             addView(scrap);
             measureChildWithMargins(scrap, 0, 0);  // 计算此碎片view包含边距的尺寸
+
             int width = getDecoratedMeasuredWidth(scrap);  // 获取此碎片view包含边距和装饰的宽度width
             int height = getDecoratedMeasuredHeight(scrap); // 获取此碎片view包含边距和装饰的高度height
 
