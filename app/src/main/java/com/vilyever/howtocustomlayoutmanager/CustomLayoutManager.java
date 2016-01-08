@@ -1,11 +1,20 @@
 package com.vilyever.howtocustomlayoutmanager;
 
+import android.content.Context;
+import android.graphics.PointF;
 import android.graphics.Rect;
+import android.support.annotation.IntDef;
+import android.support.v7.widget.LinearSmoothScroller;
 import android.support.v7.widget.RecyclerView;
+import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * CustomLayoutManager
@@ -19,6 +28,16 @@ public class CustomLayoutManager extends RecyclerView.LayoutManager {
     /** Convenience Var to call this */
     final CustomLayoutManager self = this;
 
+    /**
+     * init with orientation and itemLineCount
+     * @param orientation {@link com.vilyever.howtocustomlayoutmanager.CustomLayoutManager.State#orientation}
+     * @param itemLineCount {@link com.vilyever.howtocustomlayoutmanager.CustomLayoutManager.State#itemLineCount}
+     */
+    public CustomLayoutManager(@Orientation int orientation, int itemLineCount) {
+        setOrientation(orientation);
+        setItemLineCount(itemLineCount);
+    }
+
     /** @see android.support.v7.widget.RecyclerView.LayoutManager#onLayoutChildren(RecyclerView.Recycler, RecyclerView.State) */
     @Override
     public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
@@ -30,8 +49,36 @@ public class CustomLayoutManager extends RecyclerView.LayoutManager {
         self.getState().contentWidth = 0;
         self.getState().contentHeight = 0;
 
-        int offsetX = 0;
-        int offsetY = 0;
+        if (getItemCount() == 0) {
+            self.getState().scrolledX = 0;
+            self.getState().scrolledY = 0;
+            self.getState().totalSpreadCount = 0;
+            return;
+        }
+
+        self.getState().totalSpreadCount = 1;
+
+        int offsetX = 0; // 当前X偏移，下一个item的left为此值
+        int offsetY = 0; // 当前Y偏移，下一个item的top为此值
+        int occupiedLineBlock = 0; // 当前line已被占用的块数
+
+        /**
+         * {@link #orientation} 为 {@link #HORIZONTAL} 时，当前line的最大宽度
+         * {@link #orientation} 为 {@link #VERTICAL} 时，当前line的最大高度
+         */
+        int currentLineSpreadLength = 0;
+
+        /**
+         * {@link #orientation} 为 {@link #HORIZONTAL} 时，当前line的总高度
+         * {@link #orientation} 为 {@link #VERTICAL} 时，当前line的总宽度
+         */
+        int currentLineLength = 0;
+
+        /**
+         * {@link #orientation} 为 {@link #HORIZONTAL} 时，所有line的最大高度
+         * {@link #orientation} 为 {@link #VERTICAL} 时，所有line的最大宽度
+         */
+        int maxLineLength = 0;
 
         /**
          * 计算所有item的frame，以及总宽高
@@ -45,39 +92,65 @@ public class CustomLayoutManager extends RecyclerView.LayoutManager {
             int width = self.getDecoratedMeasuredWidth(scrap);  // 获取此碎片view包含边距和装饰的宽度width
             int height = self.getDecoratedMeasuredHeight(scrap); // 获取此碎片view包含边距和装饰的高度height
 
+            LayoutParams layoutParams = (LayoutParams) scrap.getLayoutParams();
+            occupiedLineBlock += Math.max(layoutParams.occupationLineBlocks, 1); // 记录当前line已占用的块数，每个item至少占1块
+            /** 占用的块数若超过了{@link com.vilyever.howtocustomlayoutmanager.CustomLayoutManager.State#itemLineCount}，切换到下一line */
+            if (occupiedLineBlock > self.getState().itemLineCount) {
+                if (self.getState().orientation == HORIZONTAL) {
+                    offsetX += currentLineSpreadLength; // 横向偏移当前line的最大宽度
+                    offsetY = 0; // 纵向重置到0
+                    self.getState().contentWidth += currentLineSpreadLength; // contentWidth增加当前line的最大宽度
+                }
+                else {
+                    offsetX = 0; // 横向重置到0
+                    offsetY += currentLineSpreadLength; // 纵向偏移当前line的最大高度
+                    self.getState().contentHeight += currentLineSpreadLength; // contentHeight增加当前line的最大高度
+                }
+
+                occupiedLineBlock = layoutParams.occupationLineBlocks; // 切换到新line布置item
+                currentLineSpreadLength = 0; // 新line还没有item，不占空间
+                maxLineLength = Math.max(maxLineLength, currentLineLength); // 记录之前所有line的最大长度
+                currentLineLength = 0; // 重置
+                self.getState().totalSpreadCount++;
+            }
+
             Rect frame = self.getState().itemsFrames.get(i); // 若先前生成过Rect，重复使用
             if (frame == null) {
                 frame = new Rect();
             }
+
             frame.set(offsetX, offsetY, offsetX + width, offsetY + height);
             self.getState().itemsFrames.put(i, frame); // 记录每个item的frame
             self.getState().itemsAttached.put(i, false); // 因为先前已经回收了所有item，此处将item显示标识置否
 
+            if (self.getState().orientation == HORIZONTAL) {
+                offsetY += height; // 纵向偏移，横向不变
+                currentLineSpreadLength = Math.max(currentLineSpreadLength, width); // 记录当前line最大宽度
+                currentLineLength += height; // 记录当前line总高度
+            }
+            else {
+                offsetX += width; // 横向偏移，纵向不变
+                currentLineSpreadLength = Math.max(currentLineSpreadLength, height); // 记录当前line最大高度
+                currentLineLength += width; // 记录当前line总宽度
+            }
+
             self.detachAndScrapView(scrap, recycler); // 回收本次计算的碎片view
+        }
 
-            offsetX += width;
-            offsetY += height;
-
-            self.getState().contentWidth += width;
-            self.getState().contentHeight += height;
+        if (self.getState().orientation == HORIZONTAL) {
+            self.getState().contentWidth += currentLineSpreadLength; // contentWidth增加最后line的最大宽度
+            self.getState().contentHeight = maxLineLength; // contentHeight设为所有line的最大高度
+        }
+        else {
+            self.getState().contentWidth = maxLineLength; // contentWidth设为所有line的最大宽度
+            self.getState().contentHeight += currentLineSpreadLength; // contentWidth增加最后line的最大高度
         }
 
         self.getState().contentWidth = Math.max(self.getState().contentWidth, self.getHorizontalSpace()); // 内容宽度最小为RecyclerView容器宽度
         self.getState().contentHeight = Math.max(self.getState().contentHeight, self.getVerticalSpace()); // 内容高度最小为RecyclerView容器高度
 
-        // 依照内容宽高调整记录的滑动距离
-        if (self.getState().contentWidth == self.getHorizontalSpace()) {
-            self.getState().scrolledX = 0;
-        }
-        if (self.getState().scrolledX > (self.getState().contentWidth - self.getHorizontalSpace())) {
-            self.getState().scrolledX = self.getState().contentWidth - self.getHorizontalSpace();
-        }
-        if (self.getState().contentHeight == self.getVerticalSpace()) {
-            self.getState().scrolledY = 0;
-        }
-        if (self.getState().scrolledY > (self.getState().contentHeight - self.getVerticalSpace())) {
-            self.getState().scrolledY = self.getState().contentHeight - self.getVerticalSpace();
-        }
+        // 依照新内容宽高调整记录的滑动距离，防止滑动偏移过大
+        self.fixScrollOffset();
 
         self.layoutItems(recycler, state); // 放置当前scroll offset处要展示的item
     }
@@ -153,10 +226,107 @@ public class CustomLayoutManager extends RecyclerView.LayoutManager {
         return willScroll;
     }
 
+    @Override
+    public void scrollToPosition(int position) {
+        position = Math.max(position, 0);
+        position = Math.min(position, self.getItemCount());
+
+        self.getState().scrolledX = self.getState().itemsFrames.get(position).left;
+        self.getState().scrolledY = self.getState().itemsFrames.get(position).top;
+        self.fixScrollOffset();
+
+        self.requestLayout();
+    }
+
+    @Override
+    public void smoothScrollToPosition(RecyclerView recyclerView, RecyclerView.State state, int position) {
+        position = Math.max(position, 0);
+        position = Math.min(position, self.getItemCount());
+
+        /*
+         * LinearSmoothScroller's default behavior is to scroll the contents until
+         * the child is fully visible. It will snap to the top-left or bottom-right
+         * of the parent depending on whether the direction of travel was positive
+         * or negative.
+         */
+        LinearSmoothScroller scroller = new LinearSmoothScroller(recyclerView.getContext()) {
+            /*
+             * LinearSmoothScroller, at a minimum, just need to know the vector
+             * (x/y distance) to travel in order to get from the current positioning
+             * to the target.
+             */
+            @Override
+            public PointF computeScrollVectorForPosition(int targetPosition) {
+                int oldScrollX = self.getState().scrolledX;
+                int oldScrollY = self.getState().scrolledY;
+
+                self.getState().scrolledX = self.getState().itemsFrames.get(targetPosition).left;
+                self.getState().scrolledY = self.getState().itemsFrames.get(targetPosition).top;
+                self.fixScrollOffset();
+
+                int newScrollX = self.getState().scrolledX;
+                int newScrollY = self.getState().scrolledY;
+
+                self.getState().scrolledX = oldScrollX;
+                self.getState().scrolledY = oldScrollY;
+
+                return new PointF(newScrollX - oldScrollX, newScrollY - oldScrollY);
+            }
+        };
+        scroller.setTargetPosition(position);
+        self.startSmoothScroll(scroller);
+    }
+
     /** @see RecyclerView.LayoutManager#generateDefaultLayoutParams() */
     @Override
-    public RecyclerView.LayoutParams generateDefaultLayoutParams() {
-        return new RecyclerView.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+    public LayoutParams generateDefaultLayoutParams() {
+        return new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+    }
+    /** @see RecyclerView.LayoutManager#generateLayoutParams(ViewGroup.LayoutParams) */
+    @Override
+    public RecyclerView.LayoutParams generateLayoutParams(ViewGroup.LayoutParams lp) {
+        if (lp instanceof ViewGroup.MarginLayoutParams) {
+            return new LayoutParams((ViewGroup.MarginLayoutParams) lp);
+        } else {
+            return new LayoutParams(lp);
+        }
+    }
+    /** @see RecyclerView.LayoutManager#generateLayoutParams(Context, AttributeSet) */
+    @Override
+    public RecyclerView.LayoutParams generateLayoutParams(Context c, AttributeSet attrs) {
+        return new LayoutParams(c, attrs);
+    }
+    /** @see RecyclerView.LayoutManager#checkLayoutParams(RecyclerView.LayoutParams) */
+    @Override
+    public boolean checkLayoutParams(RecyclerView.LayoutParams lp) {
+        return lp instanceof LayoutParams;
+    }
+
+    public static class LayoutParams extends RecyclerView.LayoutParams {
+
+        /**
+         * 占用块数
+         * 不同方向布局时，占用行数或列数的值
+         * {@link State#itemLineCount}
+         * default is 1, must > 0
+         */
+        public int occupationLineBlocks = 1;
+
+        public LayoutParams(Context c, AttributeSet attrs) {
+            super(c, attrs);
+        }
+        public LayoutParams(int width, int height) {
+            super(width, height);
+        }
+        public LayoutParams(ViewGroup.MarginLayoutParams source) {
+            super(source);
+        }
+        public LayoutParams(ViewGroup.LayoutParams source) {
+            super(source);
+        }
+        public LayoutParams(RecyclerView.LayoutParams source) {
+            super(source);
+        }
     }
 
     /**
@@ -277,6 +447,24 @@ public class CustomLayoutManager extends RecyclerView.LayoutManager {
          */
         boolean canScrollVertical;
 
+        /**
+         * Current orientation. Either {@link #HORIZONTAL} or {@link #VERTICAL}
+         */
+        int orientation;
+
+        /**
+         * {@link #orientation} 为 {@link #HORIZONTAL} 时，每列显示的item数
+         * {@link #orientation} 为 {@link #VERTICAL} 时，每行显示的item数
+         * 每个item有可能占用多格 {@link com.vilyever.howtocustomlayoutmanager.CustomLayoutManager.LayoutParams#occupationLineBlocks}
+         */
+        int itemLineCount;
+
+        /**
+         * {@link #orientation} 为 {@link #HORIZONTAL} 时，表示列数
+         * {@link #orientation} 为 {@link #VERTICAL} 时，表示行数
+         */
+        int totalSpreadCount;
+
         public State() {
             itemsFrames = new SparseArray<>();
             itemsAttached = new SparseBooleanArray();
@@ -286,6 +474,8 @@ public class CustomLayoutManager extends RecyclerView.LayoutManager {
             contentHeight = 0;
             canScrollHorizontal = true;
             canScrollVertical = true;
+            itemLineCount = 1;
+            totalSpreadCount = 0;
         }
     }
 
@@ -316,11 +506,72 @@ public class CustomLayoutManager extends RecyclerView.LayoutManager {
     }
 
     /**
+     * 纵然此LayoutManager在水平方向和垂直方向都可以滑动
+     * 此LayoutManager仍然带有orientation属性
+     * orientation将影响item摆放的次序
+     *
+     * 若Direction为Vertical，item的摆放顺序为从左到右，一行铺满后填充下一行
+     * 若Direction为Horizontal，item的摆放顺序为从上到下，一列铺满后填充下一列
+     */
+    @IntDef({HORIZONTAL, VERTICAL})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Orientation {}
+    public static final int HORIZONTAL = LinearLayout.HORIZONTAL;
+    public static final int VERTICAL = LinearLayout.VERTICAL;
+    public CustomLayoutManager setOrientation(@Orientation int orientation) {
+        if (orientation != HORIZONTAL && orientation != VERTICAL) {
+            throw new IllegalArgumentException("invalid orientation:" + orientation);
+        }
+        assertNotInLayoutOrScroll(null);
+        if (orientation == self.getState().orientation) {
+            return this;
+        }
+        self.getState().orientation = orientation;
+        self.requestLayout();
+        return this;
+    }
+    @Orientation
+    public int getOrientation() {
+        return self.getState().orientation;
+    }
+
+    public CustomLayoutManager setItemLineCount(int itemLineCount) {
+        assertNotInLayoutOrScroll(null);
+        if (itemLineCount == self.getState().itemLineCount) {
+            return this;
+        }
+        self.getState().itemLineCount = itemLineCount;
+        self.requestLayout();
+        return this;
+    }
+    public int getItemLineCount() {
+        return self.getState().itemLineCount;
+    }
+
+    /**
+     * 依照内容宽高调整记录的滑动距离，防止滑动偏移过大
+     */
+    private void fixScrollOffset() {
+        if (self.getState().contentWidth == self.getHorizontalSpace()) {
+            self.getState().scrolledX = 0;
+        }
+        if (self.getState().scrolledX > (self.getState().contentWidth - self.getHorizontalSpace())) {
+            self.getState().scrolledX = self.getState().contentWidth - self.getHorizontalSpace();
+        }
+        if (self.getState().contentHeight == self.getVerticalSpace()) {
+            self.getState().scrolledY = 0;
+        }
+        if (self.getState().scrolledY > (self.getState().contentHeight - self.getVerticalSpace())) {
+            self.getState().scrolledY = self.getState().contentHeight - self.getVerticalSpace();
+        }
+    }
+
+    /**
      * 容器去除padding后的宽度
      * @return 实际可摆放item的空间
      */
     private int getHorizontalSpace() {
-        return getWidth() - getPaddingRight() - getPaddingLeft();
+        return self.getWidth() - self.getPaddingRight() - self.getPaddingLeft();
     }
 
     /**
@@ -328,6 +579,6 @@ public class CustomLayoutManager extends RecyclerView.LayoutManager {
      * @return 实际可摆放item的空间
      */
     private int getVerticalSpace() {
-        return getHeight() - getPaddingBottom() - getPaddingTop();
+        return self.getHeight() - self.getPaddingBottom() - self.getPaddingTop();
     }
 }

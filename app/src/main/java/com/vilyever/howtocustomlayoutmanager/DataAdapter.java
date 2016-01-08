@@ -27,8 +27,9 @@ public class DataAdapter extends RecyclerView.Adapter<DemoViewHolder> implements
     /** @see RecyclerView.Adapter#onBindViewHolder(RecyclerView.ViewHolder, int)  **/
     @Override
     public void onBindViewHolder(DemoViewHolder holder, int position) {
-        holder.itemView.getLayoutParams().width = (self.getDemoModels().get(position).getPreferWidth());
-        holder.itemView.getLayoutParams().height = (self.getDemoModels().get(position).getPreferHeight());
+        holder.itemView.getLayoutParams().width = self.getDemoModels().get(position).getPreferWidth();
+        holder.itemView.getLayoutParams().height = self.getDemoModels().get(position).getPreferHeight();
+        ((CustomLayoutManager.LayoutParams) holder.itemView.getLayoutParams()).occupationLineBlocks = self.getDemoModels().get(position).getBlocks();
         holder.setDelegate(self);
         holder.reload(self);
     }
@@ -89,7 +90,8 @@ public class DataAdapter extends RecyclerView.Adapter<DemoViewHolder> implements
     }
     public DataAdapter setDemoModels(List<DemoModel> demoModels) {
         this.demoModels = demoModels;
-        self.notifyDataSetChanged();
+//        self.notifyDataSetChanged();
+        self.notifyItemRangeChanged(0, demoModels.size());
         return self;
     }
 

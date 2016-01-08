@@ -21,9 +21,10 @@ public class DemoModel {
         DemoModel demoModel = new DemoModel();
         Random random = new Random();
         int color = Color.rgb(Math.abs(random.nextInt()) % 256, Math.abs(random.nextInt()) % 256, Math.abs(random.nextInt()) % 256);
-        int width = (Math.abs(random.nextInt()) % 4) * 80 + 100;
-        int height = (Math.abs(random.nextInt()) % 4) * 80 + 100;
-        demoModel.setTitle(width + "x" + height).setColor(color).setPreferWidth(width).setPreferHeight(height);
+        int width = (Math.abs(random.nextInt()) % 6 + 1) * 80 + 100;
+        int height = (Math.abs(random.nextInt()) % 6 + 1) * 80 + 100;
+        int block = Math.abs(random.nextInt()) % 6;
+        demoModel.setTitle(width + "x" + height + "(" + block + ")").setColor(color).setPreferWidth(width).setPreferHeight(height).setBlocks(block);
         return demoModel;
     }
 
@@ -75,6 +76,15 @@ public class DemoModel {
     }
     public int getPreferHeight() {
         return preferHeight;
+    }
+
+    private int blocks;
+    public DemoModel setBlocks(int blocks) {
+        this.blocks = blocks;
+        return this;
+    }
+    public int getBlocks() {
+        return blocks;
     }
 
 }

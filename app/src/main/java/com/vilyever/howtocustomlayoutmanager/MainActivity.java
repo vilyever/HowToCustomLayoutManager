@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
     private CustomLayoutManager layoutManager;
     public CustomLayoutManager getLayoutManager() {
         if (layoutManager == null) {
-            layoutManager = new CustomLayoutManager();
+            layoutManager = new CustomLayoutManager(CustomLayoutManager.HORIZONTAL, 5);
         }
         return layoutManager;
     }
