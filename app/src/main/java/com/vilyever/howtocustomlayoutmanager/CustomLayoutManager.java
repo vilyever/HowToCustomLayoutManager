@@ -12,6 +12,8 @@ import android.view.ViewGroup;
  * HowToCustomLayoutManager <com.vilyever.howtocustomlayoutmanager>
  * Created by vilyever on 2016/1/7.
  * Feature:
+ * 展示一个斜线布局的示例
+ * 支持横向纵向滑动
  */
 public class CustomLayoutManager extends RecyclerView.LayoutManager {
     /** Convenience Var to call this */
