@@ -21,6 +21,7 @@ public class NumberPickerDialog extends AlertDialog implements DialogInterface.O
     public NumberPickerDialog(Context context) {
         super(context);
         mPicker = new NumberPicker(context);
+        mPicker.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
     }
 
     protected NumberPickerDialog(Context context, int theme) {

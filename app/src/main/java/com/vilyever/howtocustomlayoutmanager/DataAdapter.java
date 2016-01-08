@@ -93,7 +93,7 @@ public class DataAdapter extends RecyclerView.Adapter<DemoViewHolder> implements
         return self;
     }
 
-    public DataAdapter addModel(DemoModel demoModel, int position) {
+    public DataAdapter addModel(int position, DemoModel demoModel) {
         if (position < 0 || position > self.getDemoModels().size()) {
             throw new IndexOutOfBoundsException("position should between " + 0 + "~" + self.getDemoModels().size());
         }
@@ -111,9 +111,16 @@ public class DataAdapter extends RecyclerView.Adapter<DemoViewHolder> implements
         return self;
     }
 
+    public DataAdapter updateModel(int position, DemoModel demoModel) {
+        self.getDemoModels().set(position, demoModel);
+        self.notifyItemChanged(position);
+        return self;
+    }
+
     public DataAdapter clear() {
         self.getDemoModels().clear();
         self.notifyDataSetChanged();
         return self;
     }
+
 }

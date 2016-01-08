@@ -44,6 +44,10 @@ public class MainActivity extends AppCompatActivity {
                             "Item " + position + " clicked. " + self.getDataAdapter().getDemoModels().get(position).getPreferWidth() + "x" + self.getDataAdapter().getDemoModels().get(position).getPreferHeight(),
                             Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
+
+                    self.getDataAdapter().updateModel(position, DemoModel.generateDemoModel());
+
+                    self.getLayoutManager().setCanScrollHorizontal(false);
                 }
             });
         }
@@ -61,10 +65,10 @@ public class MainActivity extends AppCompatActivity {
         self.getRecyclerView().setLayoutManager(self.getLayoutManager());
         self.getRecyclerView().setAdapter(self.getDataAdapter());
         self.getDataAdapter().setDemoModels(self.getDemoModels());
-        self.getRecyclerView().getItemAnimator().setAddDuration(1000);
-        self.getRecyclerView().getItemAnimator().setChangeDuration(1000);
-        self.getRecyclerView().getItemAnimator().setMoveDuration(1000);
-        self.getRecyclerView().getItemAnimator().setRemoveDuration(1000);
+        self.getRecyclerView().getItemAnimator().setAddDuration(500);
+        self.getRecyclerView().getItemAnimator().setChangeDuration(500);
+        self.getRecyclerView().getItemAnimator().setMoveDuration(500);
+        self.getRecyclerView().getItemAnimator().setRemoveDuration(500);
     }
 
     @Override
@@ -93,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
                 dialog.setOnNumberSelectedListener(new NumberPickerDialog.OnNumberSelectedListener() {
                     @Override
                     public void onNumberSelected(int value) {
-                        self.getDataAdapter().addModel(DemoModel.generateDemoModel(), value);
+                        self.getDataAdapter().addModel(value, DemoModel.generateDemoModel());
                     }
                 });
                 dialog.show();
