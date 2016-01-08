@@ -287,6 +287,11 @@ public class CustomLayoutManager extends RecyclerView.LayoutManager {
         }
     }
 
+    /**
+     * 启用/禁用横向滑动
+     * @param canScrollHorizontal 启用/禁用
+     * @return {@link State#canScrollHorizontal}
+     */
     public CustomLayoutManager setCanScrollHorizontal(boolean canScrollHorizontal) {
         self.getState().canScrollHorizontal = canScrollHorizontal;
         return this;
@@ -295,6 +300,11 @@ public class CustomLayoutManager extends RecyclerView.LayoutManager {
         return self.getState().canScrollHorizontal;
     }
 
+    /**
+     * 启用/禁用纵向滑动
+     * @param canScrollVertical 启用/禁用
+     * @return {@link State#canScrollVertical}
+     */
     public CustomLayoutManager setCanScrollVertical(boolean canScrollVertical) {
         self.getState().canScrollVertical = canScrollVertical;
         return this;
