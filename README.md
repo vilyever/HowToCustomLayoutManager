@@ -1,6 +1,12 @@
 # HowToCustomLayoutManager
 展示自定义RecyclerView的LayoutManager的过程，可以按顺序检出tag来查看每个阶段的代码
 
+### 1.0.3
+展示一个实现了重用和横纵向滑动的按块分配布局的CustomLayoutManager，支持smoothScroll
+<p align="center" >
+<img src="snapshots/device-2016-01-08-145727.png" />
+</p>
+
 ### 1.0.2
 展示一个实现了重用和横纵向滑动的斜线布局的CustomLayoutManager
 
